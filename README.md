@@ -44,7 +44,7 @@ Click the **Setup UO Scene** button in the panel.
 1. **Parenting:** Select your 3D model, then hold Shift and select the **UO\_Model\_Anchor** (the yellow cross axes). Press Ctrl \+ P and choose **Object (Keep Transform)**.  
 2. **Rotation Correction:** Select your model (not the anchor). Press R, then Z, then 45, and Enter.
 
-\[\!IMPORTANT\]
+[IMPORTANT]
 
 > **Why Rotate?** The UO Camera is angled from the South-East. Rotating your model 45° to the left aligns it with the camera grid, ensuring "North" renders as "North" and not "North-East".
 
