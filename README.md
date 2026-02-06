@@ -16,8 +16,8 @@ This tool handles the specific camera geometry (Dimetric projection), lighting, 
 
 ## **📦 Installation**
 
-1. **Download:** Download the uo\_isometric\_renderer.py file from this repository.  
-2. **Open Blender:** Go to Edit \> Preferences.  
+1. **Download:** Download the uo_isometric_renderer.py file from this repository.  
+2. **Open Blender:** Go to Edit > Preferences.  
 3. **Install:**  
    * Select the **Add-ons** tab on the left.  
    * Click the **Install...** button at the top right.  
@@ -26,29 +26,29 @@ This tool handles the specific camera geometry (Dimetric projection), lighting, 
 
 ## **🚀 Usage**
 
-### **1\. Locate the Panel**
+### **1. Locate the Panel**
 
-In the 3D Viewport, press \<kbd\>N\</kbd\> on your keyboard to open the Sidebar. Click the tab labeled **UO Render**.
+In the 3D Viewport, press N on your keyboard to open the Sidebar. Click the tab labeled **UO Render**.
 
-### **2\. Scene Setup**
+### **2. Scene Setup**
 
 Click the **Setup UO Scene** button in the panel.
 
-* This creates a specialized camera (UO\_Iso\_Camera), a light (UO\_Sun), and an anchor object (UO\_Model\_Anchor).  
+* This creates a specialized camera (UO_Iso_Camera), a light (UO_Sun), and an anchor object (UO_Model_Anchor).  
 * **Note:** Do not move the camera manually. Use the **Zoom (Scale)** slider in the panel instead.
 
-### **3\. Model Setup (Important\!)**
+### **3. Model Setup (Important!)**
 
 ![Model Setup](assets/model_setup.png)
 
-1. **Parenting:** Select your 3D model, then hold \<kbd\>Shift\</kbd\> and select the **UO\_Model\_Anchor** (the yellow cross axes). Press \<kbd\>Ctrl\</kbd\> \+ \<kbd\>P\</kbd\> and choose **Object (Keep Transform)**.  
-2. **Rotation Correction:** Select your model (not the anchor). Press \<kbd\>R\</kbd\>, then \<kbd\>Z\</kbd\>, then \<kbd\>45\</kbd\>, and \<kbd\>Enter\</kbd\>.
+1. **Parenting:** Select your 3D model, then hold Shift and select the **UO\_Model\_Anchor** (the yellow cross axes). Press Ctrl \+ P and choose **Object (Keep Transform)**.  
+2. **Rotation Correction:** Select your model (not the anchor). Press R, then Z, then 45, and Enter.
 
 \[\!IMPORTANT\]
 
-**Why Rotate?** The UO Camera is angled from the South-East. Rotating your model 45° to the left aligns it with the camera grid, ensuring "North" renders as "North" and not "North-East".
+> **Why Rotate?** The UO Camera is angled from the South-East. Rotating your model 45° to the left aligns it with the camera grid, ensuring "North" renders as "North" and not "North-East".
 
-### **4\. Customization**
+### **4. Customization**
 
 * **Zoom:** Use the Zoom (Scale) property to fit your model in the frame.  
 * **Background:**  
@@ -73,8 +73,8 @@ Leave "Render Animation" unchecked and click **Render All Directions**.
 
 Renders are saved in a renders folder next to your .blend file.
 
-* **Static:** render\_S.png, render\_SE.png, etc.  
-* **Animation:** render\_S\_0001.png, render\_S\_0002.png, etc.
+* **Static:** render_S.png, render_SE.png, etc.  
+* **Animation:** render_S_0001.png, render_S_0002.png, etc.
 
 ![Output Example](assets/output_example.png)
 
@@ -83,6 +83,6 @@ Renders are saved in a renders folder next to your .blend file.
 | Issue | Solution |
 | :---- | :---- |
 | **Model facing wrong way?** | Ensure you performed the 45° Z-axis rotation on your model relative to the Anchor. |
-| **Renders look blurry?** | Go to **Render Properties** \> **Film** \> **Pixel Filter** and set the width to 0.01 for sharp, retro pixels. |
+| **Renders look blurry?** | Go to **Render Properties** > **Film** > **Pixel Filter** and set the width to 0.01 for sharp, retro pixels. |
 | **Button not working?** | Ensure you have saved your .blend file at least once. |
 
