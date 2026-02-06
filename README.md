@@ -1,8 +1,10 @@
 UO Isometric Renderer for Blender
 
-A Blender Add-on that automates the creation of 8-directional isometric sprites for Ultima Online. It handles the specific camera geometry (Dimetric projection), lighting, and batch rendering for both static images and animations.
+A Blender Add-on that automates the creation of 8-directional isometric sprites for Ultima Online.
 
-Features
+This tool handles the specific camera geometry (Dimetric projection), lighting, and batch rendering required to create perfectly aligned static images and animations for the UO engine.
+
+🌟 Features
 
 One-Click Scene Setup: Instantly creates the camera, sun, and anchor object with the mathematically correct angles for UO (2:1 pixel ratio).
 
@@ -14,9 +16,9 @@ Background Control: Toggle transparency or set specific background colors (e.g.,
 
 Integrated UI: Simple control panel in the Blender Sidebar.
 
-Installation
+📦 Installation
 
-Download: Download the uo_isometric_renderer.py file to your computer.
+Download: Download the uo_isometric_renderer.py file from this repository.
 
 Open Blender: Go to Edit > Preferences.
 
@@ -26,15 +28,15 @@ Select the Add-ons tab on the left.
 
 Click the Install... button at the top right.
 
-Navigate to and select the uo_isometric_renderer.py file you downloaded.
+Navigate to and select the .py file you downloaded.
 
 Enable: Search for "UO" in the add-on list and check the box next to Render: UO Isometric Renderer.
 
-Usage
+🚀 Usage
 
 1. Locate the Panel
 
-In the 3D Viewport, press N on your keyboard to open the Sidebar. Click the tab labeled UO Render.
+In the 3D Viewport, press <kbd>N</kbd> on your keyboard to open the Sidebar. Click the tab labeled UO Render.
 
 2. Scene Setup
 
@@ -42,15 +44,16 @@ Click the Setup UO Scene button in the panel.
 
 This creates a specialized camera (UO_Iso_Camera), a light (UO_Sun), and an anchor object (UO_Model_Anchor).
 
-Note: Do not move the camera manually. Use the "Zoom (Scale)" slider in the panel instead.
+Note: Do not move the camera manually. Use the Zoom (Scale) slider in the panel instead.
 
 3. Model Setup (Important!)
 
-Parenting: Select your 3D model, then hold Shift and select the UO_Model_Anchor (the yellow cross axes). Press Ctrl + P and choose Object (Keep Transform).
+Parenting: Select your 3D model, then hold <kbd>Shift</kbd> and select the UO_Model_Anchor (the yellow cross axes). Press <kbd>Ctrl</kbd> + <kbd>P</kbd> and choose Object (Keep Transform).
 
-Rotation Correction: Select your model (not the anchor). Press R, then Z, then 45, and Enter.
+Rotation Correction: Select your model (not the anchor). Press <kbd>R</kbd>, then <kbd>Z</kbd>, then <kbd>45</kbd>, and <kbd>Enter</kbd>.
 
-Why? The UO Camera is angled from the South-East. Rotating your model 45° to the left aligns it with the camera grid, ensuring "North" renders as "North" and not "North-East".
+[!IMPORTANT]
+Why Rotate? The UO Camera is angled from the South-East. Rotating your model 45° to the left aligns it with the camera grid, ensuring "North" renders as "North" and not "North-East".
 
 4. Customization
 
@@ -58,17 +61,19 @@ Zoom: Use the Zoom (Scale) property to fit your model in the frame.
 
 Background:
 
-Check Transparent BG for standard sprite output.
+✅ Check Transparent BG for standard sprite output.
 
-Uncheck it to use the BG Color picker (useful for solid black backgrounds 0,0,0).
+❌ Uncheck it to use the BG Color picker (useful for solid black backgrounds 0,0,0).
 
-5. Rendering
+🎬 Rendering
 
 Note: You must save your .blend file first so the renderer knows where to save the images.
 
-Static Images: Leave "Render Animation" unchecked and click Render All Directions.
+Static Images
 
-Animations:
+Leave "Render Animation" unchecked and click Render All Directions.
+
+Animations
 
 Set your start and end frames in the Blender timeline.
 
@@ -84,8 +89,20 @@ Static: render_S.png, render_SE.png, etc.
 
 Animation: render_S_0001.png, render_S_0002.png, etc.
 
-Troubleshooting
+🔧 Troubleshooting
 
-Model facing wrong way? Ensure you performed the 45° Z-axis rotation on your model relative to the Anchor.
+Issue
 
-Renders look blurry? Go to Render Properties > Film > Pixel Filter and set the width to 0.01 for sharp, retro pixels.
+Solution
+
+Model facing wrong way?
+
+Ensure you performed the 45° Z-axis rotation on your model relative to the Anchor.
+
+Renders look blurry?
+
+Go to Render Properties > Film > Pixel Filter and set the width to 0.01 for sharp, retro pixels.
+
+Button not working?
+
+Ensure you have saved your .blend file at least once.
