@@ -12,6 +12,8 @@ This tool handles the specific camera geometry (Dimetric projection), lighting, 
 * **Background Control:** Toggle transparency or set specific background colors (e.g., solid black) directly from the UI.  
 * **Integrated UI:** Simple control panel in the Blender Sidebar.
 
+![UI Panel](assets/ui_panel.png)
+
 ## **📦 Installation**
 
 1. **Download:** Download the uo\_isometric\_renderer.py file from this repository.  
@@ -36,6 +38,8 @@ Click the **Setup UO Scene** button in the panel.
 * **Note:** Do not move the camera manually. Use the **Zoom (Scale)** slider in the panel instead.
 
 ### **3\. Model Setup (Important\!)**
+
+![Model Setup](assets/model_setup.png)
 
 1. **Parenting:** Select your 3D model, then hold \<kbd\>Shift\</kbd\> and select the **UO\_Model\_Anchor** (the yellow cross axes). Press \<kbd\>Ctrl\</kbd\> \+ \<kbd\>P\</kbd\> and choose **Object (Keep Transform)**.  
 2. **Rotation Correction:** Select your model (not the anchor). Press \<kbd\>R\</kbd\>, then \<kbd\>Z\</kbd\>, then \<kbd\>45\</kbd\>, and \<kbd\>Enter\</kbd\>.
@@ -71,6 +75,8 @@ Renders are saved in a renders folder next to your .blend file.
 
 * **Static:** render\_S.png, render\_SE.png, etc.  
 * **Animation:** render\_S\_0001.png, render\_S\_0002.png, etc.
+
+![Output Example](assets/output_example.png)
 
 ## **🔧 Troubleshooting**
 
