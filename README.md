@@ -85,4 +85,40 @@ Renders are saved in a renders folder next to your .blend file.
 | **Model facing wrong way?** | Ensure you performed the 45° Z-axis rotation on your model relative to the Anchor. |
 | **Renders look blurry?** | Go to **Render Properties** > **Film** > **Pixel Filter** and set the width to 0.01 for sharp, retro pixels. |
 | **Button not working?** | Ensure you have saved your .blend file at least once. |
+| **Atlas not creating?** | Pillow auto-installs on first use. If it fails, see manual install instructions below. |
 
+## **📦 Texture Atlas**
+
+Check **Create Texture Atlas** to pack all rendered frames into a single spritesheet.
+
+### **Atlas Layout**
+- **Rows** = Directions (N, NE, E, SE, S, SW, W, NW)
+- **Columns** = Animation frames (1, 2, 3, 4...)
+
+### **Output Files**
+- `texture_atlas.png` - Combined spritesheet
+- `texture_atlas.json` - Metadata with frame positions
+
+### **JSON Metadata Structure**
+```json
+{
+  "atlas": { "width": 2048, "height": 4096 },
+  "frame": { "width": 512, "height": 512 },
+  "directions": [
+    { "name": "N", "row": 0, "y": 0 },
+    { "name": "NE", "row": 1, "y": 512 }
+  ],
+  "frames": [
+    { "direction": "N", "frame": 0, "x": 0, "y": 0, "width": 512, "height": 512 }
+  ]
+}
+```
+
+### **Pillow Dependency**
+The atlas feature requires **Pillow** which auto-installs on first use.
+
+**Manual install (if auto fails):**
+1. Open Blender's Python console
+2. Run: `import subprocess, sys`
+3. Run: `subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'Pillow'])`
+4. Restart Blender

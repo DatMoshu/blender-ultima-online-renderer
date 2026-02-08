@@ -1,7 +1,7 @@
 bl_info = {
     "name": "UO Isometric Renderer",
     "author": "Moshu",
-    "version": (1, 1),
+    "version": (1, 2),
     "blender": (3, 0, 0),
     "location": "View3D > Sidebar > UO Render",
     "description": "Sets up camera and renders 8-directional isometric sprites/animations for Ultima Online.",
@@ -11,6 +11,9 @@ bl_info = {
 import bpy
 import math
 import os
+import json
+import subprocess
+import sys
 
 # --- Update Functions ---
 def update_transparency(self, context):
@@ -71,6 +74,11 @@ class UORenderSettings(bpy.types.PropertyGroup):
         description="World Background Color (used if Transparency is OFF)",
         update=update_background
     )
+    create_texture_atlas: bpy.props.BoolProperty(
+        name="Create Texture Atlas",
+        default=False,
+        description="Pack all rendered frames into a single texture atlas with JSON metadata"
+    )
 
 # --- Operator: Help Popup ---
 class UO_OT_ShowHelp(bpy.types.Operator):
@@ -101,6 +109,21 @@ class UO_OT_ShowHelp(bpy.types.Operator):
         col = box.column(align=True)
         col.label(text="- Uncheck 'Transparent BG' to use color.")
         col.label(text="- Pick a color in 'World Settings'.")
+        
+        box.separator()
+        box.label(text="Texture Atlas:")
+        col = box.column(align=True)
+        col.label(text="- Check 'Create Texture Atlas' to pack frames")
+        col.label(text="- Pillow auto-installs on first use")
+        col.label(text="- Atlas: rows=directions, cols=frames")
+        col.separator()
+        col.label(text="Manual Pillow install (if auto fails):")
+        col.label(text="1. Open Blender's Python console")
+        col.label(text="2. Run: import subprocess, sys")
+        col.label(text="3. Run: subprocess.check_call(")
+        col.label(text="   [sys.executable, '-m', 'pip',")
+        col.label(text="   'install', 'Pillow'])")
+        col.label(text="4. Restart Blender")
 
 # --- Operator: Setup Scene ---
 class UO_OT_SetupScene(bpy.types.Operator):
@@ -173,6 +196,156 @@ class UO_OT_SetupScene(bpy.types.Operator):
         self.report({'INFO'}, "Scene Setup Complete.")
         return {'FINISHED'}
 
+# --- Texture Atlas Creation ---
+def ensure_pillow_installed():
+    """
+    Attempts to install Pillow if not present.
+    Returns (success, message)
+    """
+    import importlib
+    import site
+    
+    # First, ensure user site-packages is in the path
+    user_site = site.getusersitepackages()
+    if user_site and user_site not in sys.path:
+        sys.path.append(user_site)
+    
+    try:
+        from PIL import Image
+        return True, "Pillow already installed"
+    except ImportError:
+        pass
+    
+    # Try to install Pillow
+    print("Pillow not found. Attempting to install...")
+    try:
+        # Install to user site-packages with --user flag
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--user', 'Pillow'])
+        print("Pillow installed successfully!")
+        
+        # Refresh user site-packages path
+        importlib.reload(site)
+        user_site = site.getusersitepackages()
+        if user_site and user_site not in sys.path:
+            sys.path.insert(0, user_site)
+        
+        # Invalidate import caches so Python finds the new package
+        importlib.invalidate_caches()
+        
+        # Try importing again
+        try:
+            from PIL import Image
+            return True, "Pillow installed and loaded successfully"
+        except ImportError:
+            return False, "Pillow installed but import failed. Please restart Blender."
+            
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to install Pillow: {e}")
+        return False, f"Auto-install failed: {e}. See 'How to Use' for manual instructions."
+    except Exception as e:
+        print(f"Error installing Pillow: {e}")
+        return False, f"Auto-install failed: {e}. See 'How to Use' for manual instructions."
+
+def create_texture_atlas(render_path, directions, frame_count, res_x, res_y):
+    """
+    Creates a texture atlas from rendered frames.
+    Rows = directions (N, NE, E, SE, S, SW, W, NW)
+    Columns = animation frames
+    Also generates a JSON metadata file.
+    """
+    # Ensure Pillow is installed
+    install_success, install_msg = ensure_pillow_installed()
+    if not install_success:
+        return False, install_msg
+    
+    try:
+        from PIL import Image
+    except ImportError:
+        return False, "Pillow import failed after install. Please restart Blender."
+    
+    # Atlas dimensions
+    atlas_width = res_x * frame_count
+    atlas_height = res_y * len(directions)
+    
+    # Create atlas image (RGBA for transparency support)
+    atlas = Image.new('RGBA', (atlas_width, atlas_height), (0, 0, 0, 0))
+    
+    # Metadata structure
+    metadata = {
+        "atlas": {
+            "width": atlas_width,
+            "height": atlas_height
+        },
+        "frame": {
+            "width": res_x,
+            "height": res_y
+        },
+        "directions": [],
+        "frames": []
+    }
+    
+    # Process each direction (row)
+    for row_idx, (dir_name, _) in enumerate(directions):
+        direction_data = {
+            "name": dir_name,
+            "row": row_idx,
+            "y": row_idx * res_y
+        }
+        metadata["directions"].append(direction_data)
+        
+        # Process each frame (column)
+        for col_idx in range(frame_count):
+            # Determine filename based on frame count
+            if frame_count == 1:
+                filename = f"render_{dir_name}.png"
+            else:
+                # Frame numbers are 1-indexed in the original renders
+                frame_num = col_idx + 1
+                filename = f"render_{dir_name}_{frame_num:04d}.png"
+            
+            filepath = os.path.join(render_path, filename)
+            
+            if os.path.exists(filepath):
+                frame_img = Image.open(filepath).convert('RGBA')
+                # Resize if needed (should match, but safety check)
+                if frame_img.size != (res_x, res_y):
+                    frame_img = frame_img.resize((res_x, res_y), Image.LANCZOS)
+                
+                # Paste into atlas
+                x_pos = col_idx * res_x
+                y_pos = row_idx * res_y
+                atlas.paste(frame_img, (x_pos, y_pos))
+                
+                # Add frame metadata
+                frame_data = {
+                    "direction": dir_name,
+                    "frame": col_idx,
+                    "row": row_idx,
+                    "column": col_idx,
+                    "x": x_pos,
+                    "y": y_pos,
+                    "width": res_x,
+                    "height": res_y,
+                    "source_file": filename
+                }
+                metadata["frames"].append(frame_data)
+            else:
+                print(f"Warning: Could not find {filepath}")
+    
+    # Save atlas
+    atlas_path = os.path.join(render_path, "texture_atlas.png")
+    atlas.save(atlas_path, "PNG")
+    
+    # Save metadata JSON
+    json_path = os.path.join(render_path, "texture_atlas.json")
+    with open(json_path, 'w') as f:
+        json.dump(metadata, f, indent=2)
+    
+    print(f"Atlas saved to: {atlas_path}")
+    print(f"Metadata saved to: {json_path}")
+    
+    return True, atlas_path
+
 # --- Operator: Render Batch ---
 class UO_OT_RenderBatch(bpy.types.Operator):
     """Renders 8 directions (and frames if animation is checked)"""
@@ -204,9 +377,11 @@ class UO_OT_RenderBatch(bpy.types.Operator):
         if not os.path.exists(full_render_path):
             os.makedirs(full_render_path)
 
+        # Direction order for atlas: N first (row 1), then clockwise
+        # Rendering order matches atlas row order
         directions = [
-            ("S", 0), ("SE", 45), ("E", 90), ("NE", 135),
-            ("N", 180), ("NW", 225), ("W", 270), ("SW", 315)
+            ("N", 180), ("NE", 135), ("E", 90), ("SE", 45),
+            ("S", 0), ("SW", 315), ("W", 270), ("NW", 225)
         ]
         
         original_rotation = anchor.rotation_euler.z
@@ -230,7 +405,24 @@ class UO_OT_RenderBatch(bpy.types.Operator):
             print(f"Finished Direction: {dir_name}")
 
         anchor.rotation_euler.z = original_rotation
-        self.report({'INFO'}, "Batch Render Complete!")
+        
+        # Create texture atlas if enabled
+        if settings.create_texture_atlas:
+            frame_count = (end_frame - start_frame + 1) if settings.render_animations else 1
+            success, result = create_texture_atlas(
+                full_render_path, 
+                directions, 
+                frame_count,
+                settings.resolution_x,
+                settings.resolution_y
+            )
+            if success:
+                self.report({'INFO'}, f"Batch Render & Atlas Complete! Atlas: {result}")
+            else:
+                self.report({'WARNING'}, f"Batch Render Complete. Atlas failed: {result}")
+        else:
+            self.report({'INFO'}, "Batch Render Complete!")
+        
         return {'FINISHED'}
 
 # --- UI Panel ---
@@ -279,6 +471,14 @@ class UO_PT_Panel(bpy.types.Panel):
         if settings.render_animations:
             row = box.row()
             row.label(text=f"Frames: {scene.frame_start} to {scene.frame_end}")
+        
+        box.prop(settings, "create_texture_atlas")
+        if settings.create_texture_atlas:
+            sub = box.box()
+            sub.label(text="Atlas Layout:", icon='TEXTURE')
+            sub.label(text="Row 1: N → Frames 1,2,3...")
+            sub.label(text="Row 2: NE → Frames 1,2,3...")
+            sub.label(text="...continuing clockwise")
             
         box.operator("uo.render_batch", icon='RENDER_ANIMATION')
 
